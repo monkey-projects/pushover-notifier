@@ -39,3 +39,17 @@
                               first
                               :message)
                           "test-build"))))))
+
+(deftest evt->message
+  (testing "sets message string"
+    (is (string? (:message (sut/evt->message {:build {:build-id "test-build"}})))))
+
+  (testing "sets low priority on successful builds"
+    (is (= -1 (-> {:build {:status :success}}
+                  (sut/evt->message)
+                  :priority))))
+
+  (testing "sets normal priority on failed builds"
+    (is (= 0 (-> {:build {:status :error}}
+                 (sut/evt->message)
+                 :priority)))))

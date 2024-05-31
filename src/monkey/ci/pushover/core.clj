@@ -30,8 +30,13 @@
   ;; Only dispatch build end events
   (= :build/end (:type evt)))
 
-(defn evt->message [evt]
-  (format "Build completed: %s" (get-in evt [:build :build-id])))
+(def prio-low -1)
+(def prio-normal 0)
+
+(defn evt->message [{:keys [build] :as evt}]
+  ;; TODO Add more information to the message
+  {:message (format "Build completed: %s" (:build-id build))
+   :priority (if (= :error (:status build)) prio-normal prio-low)})
 
 (defn make-poster
   "Creates a poster fn for pushover"
@@ -39,20 +44,14 @@
   (let [client (p/make-client conf)]
     (fn [msg]
       (p/post-message client (-> (select-keys conf [:token :user])
-                                 (assoc :message msg))))))
-
-(defn read-bytes [^jakarta.jms.BytesMessage msg]
-  (let [buf (byte-array (.getBodyLength msg))]
-    (.readBytes msg buf)
-    (String. buf)))
+                                 (merge msg))))))
 
 (defn run
   "Runs the application loop with given configuration"
   [conf]
   (let [poster (make-poster (:pushover conf))]
     (with-open [broker (connect-broker (:events conf))
-                consumer (jms/consume broker (get-in conf [:events :topic])
-                                      {:deserializer read-bytes})]
+                consumer (jms/consume broker (get-in conf [:events :topic]))]
       ;; Start consuming events
       (loop [msg (consumer)]
         (when-let [evt (some-> msg (parse-edn-str))]
@@ -66,4 +65,6 @@
   (let [config-file (first args)
         conf (load-config config-file)]
     (t/log! {:level :debug :data conf} "Config loaded")
-    (run conf)))
+    (try
+      (run conf)
+      (catch InterruptedException ignored))))
