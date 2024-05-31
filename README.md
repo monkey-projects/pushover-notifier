@@ -12,5 +12,6 @@ there on restart.
 
 # License
 
-Copyright (c) 2024 by ]Monkey Projects BV](https://www.monkey-projects.be)
+Copyright (c) 2024 by [Monkey Projects BV](https://www.monkey-projects.be)
+
 [MIT license](LICENSE)
