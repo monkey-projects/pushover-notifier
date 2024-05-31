@@ -1,0 +1,15 @@
+{:deps {com.monkeyprojects/monkey-jms {:mvn/version "0.1.2-SNAPSHOT"}
+        com.monkeyprojects/pushover-clj {:mvn/version "0.1.0-SNAPSHOT"}
+        com.taoensso/telemere {:mvn/version "1.0.0-beta14"}
+        com.taoensso/slf4j-telemere {:mvn/version "1.0.0-beta14"}}
+
+ :aliases
+ {:dev
+  {:extra-paths ["dev-resources" "env/dev"]}
+
+  :test
+  {:extra-deps {com.monkeyprojects/build {:mvn/version "0.2.0"}}
+   :exec-fn monkey.test/all}
+
+  :junit
+  {:exec-fn monkey.test/junit}}}
