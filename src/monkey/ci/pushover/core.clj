@@ -41,12 +41,18 @@
       (p/post-message client (-> (select-keys conf [:token :user])
                                  (assoc :message msg))))))
 
+(defn read-bytes [^jakarta.jms.BytesMessage msg]
+  (let [buf (byte-array (.getBodyLength msg))]
+    (.readBytes msg buf)
+    (String. buf)))
+
 (defn run
   "Runs the application loop with given configuration"
   [conf]
   (let [poster (make-poster (:pushover conf))]
     (with-open [broker (connect-broker (:events conf))
-                consumer (jms/consume broker (get-in conf [:events :topic]))]
+                consumer (jms/consume broker (get-in conf [:events :topic])
+                                      {:deserializer read-bytes})]
       ;; Start consuming events
       (loop [msg (consumer)]
         (when-let [evt (some-> msg (parse-edn-str))]
