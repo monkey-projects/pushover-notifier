@@ -12,4 +12,13 @@
    :exec-fn monkey.test/all}
 
   :junit
-  {:exec-fn monkey.test/junit}}}
+  {:exec-fn monkey.test/junit}
+
+  :jar
+  {:extra-deps {com.monkeyprojects/build {:mvn/version "0.2.0"}}
+   :exec-fn monkey.build/jar
+   :exec-args {:jar "target/pushover-notifier.jar"}}
+
+  :uber
+  {:exec-fn monkey.build/uberjar
+   :exec-args {:main monkey.ci.pushover.core}}}}
