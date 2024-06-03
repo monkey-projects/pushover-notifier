@@ -34,9 +34,10 @@
 (def prio-normal 0)
 
 (defn evt->message [{:keys [build] :as evt}]
-  ;; TODO Add more information to the message
-  {:message (format "Build completed: %s" (:build-id build))
-   :priority (if (= :error (:status build)) prio-normal prio-low)})
+  (let [failed? (= :error (:status build))]
+    ;; TODO Add more information to the message
+    {:message (format "Build %s: %s" (if failed? "failed" "succeeded") (:build-id build))
+     :priority (if failed? prio-normal prio-low)}))
 
 (defn make-poster
   "Creates a poster fn for pushover"
