@@ -16,14 +16,16 @@
 (defn uberjar [ctx]
   (when (build-image? ctx)
     (-> (clj/clj-deps "uberjar" {} "-X:jar:uber")
-        (assoc :save-artifacts [uberjar-artifact]))))
+        (assoc :save-artifacts [uberjar-artifact]
+               :dependencies ["test"]))))
 
 (defn image [ctx]
   (when (build-image? ctx)
     (let [version (or (bc/tag ctx) "latest")]
       (-> (kaniko/image {:target-img (str "fra.ocir.io/frjdhmocn5qi/pushover-notifier:" version)}
                         ctx)
-          (assoc :restore-artifacts [uberjar-artifact])))))
+          (assoc :restore-artifacts [uberjar-artifact]
+                 :dependencies ["uberjar"])))))
 
 [test
  uberjar
